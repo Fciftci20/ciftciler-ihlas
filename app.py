@@ -70,6 +70,10 @@ button {
 <input name="kg" placeholder="Kg">
 <input name="fiyat" placeholder="Fiyat">
 <input name="kasa" placeholder="Kasa Adedi">
+<canvas id="canvas" width="300" height="150" style="border:1px solid black;"></canvas>
+<br>
+<button type="button" onclick="temizle()">İmzayı Temizle</button>
+<br><br>
 <button>Satış Yap</button>
 </form>
 </div>
@@ -103,7 +107,34 @@ button {
 <p>{{s}}</p>
 {% endfor %}
 </div>
+<script>
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
 
+let yaziyor = false;
+
+canvas.onmousedown = () => yaziyor = true;
+canvas.onmouseup = () => {
+    yaziyor = false;
+    ctx.beginPath();
+};
+
+canvas.onmousemove = (e) => {
+    if(!yaziyor) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+
+    let rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+};
+
+function temizle(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+</script>
 </body>
 </html>
 """
