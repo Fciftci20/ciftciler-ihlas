@@ -6,7 +6,7 @@ app = Flask(__name__)
 stok = []
 musteriler = {}
 kasalar = {}
-
+imzalar = []
 HTML = """
 <!DOCTYPE html>
 <html>
@@ -72,6 +72,7 @@ button {
 <input name="kasa" placeholder="Kasa Adedi">
 <canvas id="canvas" width="300" height="150" style="border:1px solid black;"></canvas>
 <br>
+<input type="hidden" name="imza" id="imzaInput">
 <button type="button" onclick="temizle()">İmzayı Temizle</button>
 <br><br>
 <button>Satış Yap</button>
@@ -103,6 +104,10 @@ button {
 
 <div class="box">
 <h3>📊 Stok</h3>
+<h3>✍️ İmzalar</h3>
+{% for imza in imzalar %}
+    <img src="{{imza}}" width="200">
+{% endfor %}
 {% for s in stok %}
 <p>{{s}}</p>
 {% endfor %}
@@ -162,6 +167,10 @@ canvas.addEventListener("touchmove", (e) => {
 function temizle(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 }
+document.querySelector("form[action='/satis']").addEventListener("submit", function(){
+    let data = canvas.toDataURL();
+    document.getElementById("imzaInput").value = data;
+});
 </script>
 </body>
 </html>
@@ -169,8 +178,7 @@ function temizle(){
 
 @app.route("/")
 def home():
-    return render_template_string(HTML, stok=stok, musteriler=musteriler, kasalar=kasalar)
-
+    return render_template_string(HTML, stok=stok, musteriler=musteriler, kasalar=kasalar, imzalar=imzalar)
 @app.route("/giris", methods=["POST"])
 def giris():
     v = request.form
