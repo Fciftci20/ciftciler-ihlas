@@ -214,5 +214,19 @@ def odeme():
 
     return redirect("/")
 
+@app.route("/fis")
+def fis():
+    if len(musteriler) == 0:
+        return "<h2>Kayıt yok</h2>"
+
+    son_musteri = list(musteriler.keys())[-1]
+    borc = musteriler.get(son_musteri, 0)
+
+    return f"""
+    <h1>Çiftçiler İHLAS</h1>
+    <p>Müşteri: {son_musteri}</p>
+    <p>Borç: {borc} TL</p>
+    <button onclick="window.print()">Yazdır</button>
+    """
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
