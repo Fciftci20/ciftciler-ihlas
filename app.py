@@ -113,23 +113,51 @@ let ctx = canvas.getContext("2d");
 
 let yaziyor = false;
 
-canvas.onmousedown = () => yaziyor = true;
-canvas.onmouseup = () => {
+// MOUSE
+canvas.addEventListener("mousedown", () => yaziyor = true);
+canvas.addEventListener("mouseup", () => {
     yaziyor = false;
     ctx.beginPath();
-};
+});
 
-canvas.onmousemove = (e) => {
+canvas.addEventListener("mousemove", (e) => {
     if(!yaziyor) return;
+
+    let rect = canvas.getBoundingClientRect();
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
 
-    let rect = canvas.getBoundingClientRect();
     ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-};
+});
+
+// 📱 TOUCH (ASIL BU LAZIM)
+canvas.addEventListener("touchstart", (e) => {
+    yaziyor = true;
+});
+
+canvas.addEventListener("touchend", () => {
+    yaziyor = false;
+    ctx.beginPath();
+});
+
+canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    if(!yaziyor) return;
+
+    let rect = canvas.getBoundingClientRect();
+    let touch = e.touches[0];
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+
+    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+});
 
 function temizle(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
