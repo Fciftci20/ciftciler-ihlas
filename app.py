@@ -1,12 +1,11 @@
 from flask import Flask, request, redirect, render_template_string
-from datetime import datetime
 
 app = Flask(__name__)
 
+# VERİLER
 stok = []
 musteriler = {}
-hareketler = []
-odemeler = []
+kasalar = {}
 
 HTML = """
 <!DOCTYPE html>
@@ -14,12 +13,37 @@ HTML = """
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Çiftçiler İHLAS</title>
+
 <style>
-body { font-family:Arial; background:#f5f5f5; padding:10px;}
-h1 { color:#1F7A4C;}
-.box { background:white; padding:15px; margin:10px 0; border-radius:10px;}
-input { padding:10px; width:100%; margin:5px 0;}
-button { background:#1F7A4C; color:white; padding:10px; border:none;}
+body {
+    font-family: Arial;
+    background: #f5f5f5;
+    padding: 10px;
+}
+
+h1 {
+    color: #1F7A4C;
+}
+
+.box {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+}
+
+input {
+    padding: 10px;
+    width: 100%;
+    margin: 5px 0;
+}
+
+button {
+    background: #1F7A4C;
+    color: white;
+    padding: 10px;
+    border: none;
+}
 </style>
 </head>
 
@@ -33,7 +57,7 @@ button { background:#1F7A4C; color:white; padding:10px; border:none;}
 <input name="urun" placeholder="Ürün">
 <input name="cins" placeholder="Cins">
 <input name="kg" placeholder="Kg">
-<input name="oda" placeholder="Oda">
+<input name="oda" placeholder="Oda (1-22)">
 <button>Kaydet</button>
 </form>
 </div>
@@ -45,6 +69,7 @@ button { background:#1F7A4C; color:white; padding:10px; border:none;}
 <input name="urun" placeholder="Ürün">
 <input name="kg" placeholder="Kg">
 <input name="fiyat" placeholder="Fiyat">
+<input name="kasa" placeholder="Kasa Adedi">
 <button>Satış Yap</button>
 </form>
 </div>
@@ -60,8 +85,15 @@ button { background:#1F7A4C; color:white; padding:10px; border:none;}
 
 <div class="box">
 <h3>👤 Cari</h3>
-{% for m, bakiye in musteriler.items() %}
-<p>{{m}} : {{bakiye}} TL</p>
+{% for m, b in musteriler.items() %}
+<p>{{m}} : {{b}} TL</p>
+{% endfor %}
+</div>
+
+<div class="box">
+<h3>📦 Kasa Durumu</h3>
+{% for m, k in kasalar.items() %}
+<p>{{m}} : {{k}} kasa</p>
 {% endfor %}
 </div>
 
@@ -78,7 +110,7 @@ button { background:#1F7A4C; color:white; padding:10px; border:none;}
 
 @app.route("/")
 def home():
-    return render_template_string(HTML, stok=stok, musteriler=musteriler)
+    return render_template_string(HTML, stok=stok, musteriler=musteriler, kasalar=kasalar)
 
 @app.route("/giris", methods=["POST"])
 def giris():
@@ -89,16 +121,30 @@ def giris():
 @app.route("/satis", methods=["POST"])
 def satis():
     v = request.form
-    toplam = float(v["kg"]) * float(v["fiyat"])
-    musteriler[v["musteri"]] = musteriler.get(v["musteri"], 0) + toplam
-    hareketler.append(v)
+
+    kg = float(v.get("kg", 0))
+    fiyat = float(v.get("fiyat", 0))
+    toplam = kg * fiyat
+
+    musteri = v.get("musteri")
+
+    # Para cari
+    musteriler[musteri] = musteriler.get(musteri, 0) + toplam
+
+    # Kasa cari
+    kasa = int(v.get("kasa", 0) or 0)
+    kasalar[musteri] = kasalar.get(musteri, 0) + kasa
+
     return redirect("/")
 
 @app.route("/odeme", methods=["POST"])
 def odeme():
     v = request.form
-    musteriler[v["musteri"]] = musteriler.get(v["musteri"], 0) - float(v["tutar"])
-    odemeler.append(v)
+    musteri = v.get("musteri")
+    tutar = float(v.get("tutar", 0))
+
+    musteriler[musteri] = musteriler.get(musteri, 0) - tutar
+
     return redirect("/")
 
 if __name__ == "__main__":
